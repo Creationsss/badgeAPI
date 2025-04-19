@@ -90,6 +90,18 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 	return Response.json({
 		status: 200,
 		badges,
+	}, {
+		status: 200,
+		headers: {
+			"Cache-Control": "public, max-age=60",
+			"Content-Type": "application/json",
+			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Methods": "GET, OPTIONS",
+			"Access-Control-Allow-Headers": "Content-Type",
+			"Access-Control-Max-Age": "86400",
+			"Access-Control-Allow-Credentials": "true",
+			"Access-Control-Expose-Headers": "Content-Type",
+		},
 	});
 }
 
