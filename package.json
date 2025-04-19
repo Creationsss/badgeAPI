@@ -1,0 +1,24 @@
+{
+	"name": "bun_frontend_template",
+	"module": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"start": "bun run src/index.ts",
+		"dev": "bun run --hot src/index.ts --dev",
+		"lint": "bunx biome check",
+		"lint:fix": "bunx biome check --fix",
+		"cleanup": "rm -rf logs node_modules bun.lockdb"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.2.9",
+		"@types/ejs": "^3.1.5",
+		"globals": "^16.0.0",
+		"@biomejs/biome": "^1.9.4"
+	},
+	"peerDependencies": {
+		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"ejs": "^3.1.10"
+	}
+}
