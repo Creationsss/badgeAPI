@@ -58,10 +58,15 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		validServices = badgeServices.map((b) => b.service);
 	}
 
-	const badges: BadgeResult = await fetchBadges(userId, validServices, {
-		nocache: cache !== "true",
-		separated: seperated === "true",
-	});
+	const badges: BadgeResult = await fetchBadges(
+		userId,
+		validServices,
+		{
+			nocache: cache !== "true",
+			separated: seperated === "true",
+		},
+		request,
+	);
 
 	if (badges instanceof Error) {
 		return Response.json(

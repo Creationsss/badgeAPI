@@ -1,10 +1,12 @@
-import { badgeServices, redisTtl } from "@config/environment";
+import { discordBadgeDetails, discordBadges } from "@config/discordBadges";
+import { badgeServices, botToken, redisTtl } from "@config/environment";
 import { fetch, redis } from "bun";
 
 export async function fetchBadges(
 	userId: string,
 	services: string[],
 	options?: FetchBadgesOptions,
+	request?: Request,
 ): Promise<BadgeResult> {
 	const { nocache = false, separated = false } = options ?? {};
 	const results: Record<string, Badge[]> = {};
@@ -125,6 +127,38 @@ export async function fetchBadges(
 								});
 							}),
 						);
+						break;
+					}
+
+					case "discord": {
+						if (!botToken) break;
+
+						const res = await fetch(url as string, {
+							headers: {
+								Authorization: `Bot ${botToken}`,
+							},
+						});
+						if (!res.ok) break;
+
+						const data = await res.json();
+
+						if (data.avatar.startsWith("a_")) {
+							result.push({
+								tooltip: "Discord Nitro",
+								badge: `${request ? new URL(request.url).origin : ""}/public/badges/discord/NITRO.svg`,
+							});
+						}
+
+						for (const [flag, bitwise] of Object.entries(discordBadges)) {
+							if (data.flags & bitwise) {
+								const badge =
+									discordBadgeDetails[flag as keyof typeof discordBadgeDetails];
+								result.push({
+									tooltip: badge.tooltip,
+									badge: `${request ? new URL(request.url).origin : ""}${badge.icon}`,
+								});
+							}
+						}
 						break;
 					}
 				}

@@ -37,6 +37,9 @@ REDIS_URL=redis://username:password@localhost:6379
 
 # Value is in seconds
 REDIS_TTL=3600
+
+#only use this if you want to show discord badges
+DISCORD_TOKEN=discord_bot_token
 ```
 
 ## Endpoint

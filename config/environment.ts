@@ -34,4 +34,10 @@ export const badgeServices: badgeURLMap[] = [
 				`https://raw.githubusercontent.com/enmity-mod/badges/main/data/${id}.json`,
 		}),
 	},
+	{
+		service: "Discord",
+		url: (userId: string) => `https://discord.com/api/v10/users/${userId}`,
+	},
 ];
+
+export const botToken: string | undefined = process.env.DISCORD_TOKEN;
