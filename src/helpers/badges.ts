@@ -2,6 +2,14 @@ import { discordBadgeDetails, discordBadges } from "@config/discordBadges";
 import { badgeServices, botToken, redisTtl } from "@config/environment";
 import { fetch, redis } from "bun";
 
+function getRequestOrigin(request: Request): string {
+	const headers = request.headers;
+	const forwardedProto = headers.get("X-Forwarded-Proto") || "http";
+	const host = headers.get("Host") || new URL(request.url).host;
+	return `${forwardedProto}://${host}`;
+}
+
+
 export async function fetchBadges(
 	userId: string,
 	services: string[],
@@ -141,11 +149,12 @@ export async function fetchBadges(
 						if (!res.ok) break;
 
 						const data = await res.json();
+						const origin = request ? getRequestOrigin(request) : "";
 
 						if (data.avatar.startsWith("a_")) {
 							result.push({
 								tooltip: "Discord Nitro",
-								badge: `${request ? new URL(request.url).origin : ""}/public/badges/discord/NITRO.svg`,
+								badge: `${origin}/public/badges/discord/NITRO.svg`,
 							});
 						}
 
@@ -155,7 +164,7 @@ export async function fetchBadges(
 									discordBadgeDetails[flag as keyof typeof discordBadgeDetails];
 								result.push({
 									tooltip: badge.tooltip,
-									badge: `${request ? new URL(request.url).origin : ""}${badge.icon}`,
+									badge: `${origin}${badge.icon}`,
 								});
 							}
 						}
