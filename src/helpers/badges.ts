@@ -9,7 +9,6 @@ function getRequestOrigin(request: Request): string {
 	return `${forwardedProto}://${host}`;
 }
 
-
 export async function fetchBadges(
 	userId: string,
 	services: string[],
