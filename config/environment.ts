@@ -9,11 +9,6 @@ export const redisTtl: number = process.env.REDIS_TTL
 	? Number.parseInt(process.env.REDIS_TTL, 10)
 	: 60 * 60 * 1; // 1 hour
 
-// not sure the point ?
-// function getClientModBadgesUrl(userId: string): string {
-// 	return `https://cdn.jsdelivr.net/gh/Equicord/ClientModBadges-API@main/users/${userId}.json`;
-// }
-
 export const badgeServices: badgeURLMap[] = [
 	{
 		service: "Vencord",
@@ -31,8 +26,12 @@ export const badgeServices: badgeURLMap[] = [
 		service: "ReviewDb",
 		url: "https://manti.vendicated.dev/api/reviewdb/badges",
 	},
-	// {
-	// 	service: "ClientMods",
-	// 	url: getClientModBadgesUrl,
-	// }
+	{
+		service: "Enmity",
+		url: (userId: string) => ({
+			user: `https://raw.githubusercontent.com/enmity-mod/badges/main/${userId}.json`,
+			badge: (id: string) =>
+				`https://raw.githubusercontent.com/enmity-mod/badges/main/data/${id}.json`,
+		}),
+	},
 ];

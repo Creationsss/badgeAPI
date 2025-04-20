@@ -32,23 +32,23 @@ export async function fetchBadges(
 				}
 			}
 
-			let url: string;
-			if (typeof entry.url === "function") {
-				url = entry.url(userId);
-			} else {
-				url = entry.url;
-			}
+			const result: Badge[] = [];
 
 			try {
-				const res = await fetch(url);
-				if (!res.ok) return;
-				const data = await res.json();
-
-				const result: Badge[] = [];
+				let url: string | { user: string; badge: (id: string) => string };
+				if (typeof entry.url === "function") {
+					url = entry.url(userId);
+				} else {
+					url = entry.url;
+				}
 
 				switch (serviceKey) {
 					case "vencord":
 					case "equicord": {
+						const res = await fetch(url as string);
+						if (!res.ok) break;
+
+						const data = await res.json();
 						const userBadges = data[userId];
 						if (Array.isArray(userBadges)) {
 							for (const b of userBadges) {
@@ -62,6 +62,10 @@ export async function fetchBadges(
 					}
 
 					case "nekocord": {
+						const res = await fetch(url as string);
+						if (!res.ok) break;
+
+						const data = await res.json();
 						const userBadgeIds = data.users?.[userId]?.badges;
 						if (Array.isArray(userBadgeIds)) {
 							for (const id of userBadgeIds) {
@@ -78,6 +82,10 @@ export async function fetchBadges(
 					}
 
 					case "reviewdb": {
+						const res = await fetch(url as string);
+						if (!res.ok) break;
+
+						const data = await res.json();
 						for (const b of data) {
 							if (b.discordID === userId) {
 								result.push({
@@ -86,6 +94,37 @@ export async function fetchBadges(
 								});
 							}
 						}
+						break;
+					}
+
+					case "enmity": {
+						if (
+							typeof url !== "object" ||
+							typeof url.user !== "string" ||
+							typeof url.badge !== "function"
+						)
+							break;
+
+						const userRes = await fetch(url.user);
+						if (!userRes.ok) break;
+
+						const badgeIds: string[] = await userRes.json();
+						if (!Array.isArray(badgeIds)) break;
+
+						await Promise.all(
+							badgeIds.map(async (id) => {
+								const badgeRes = await fetch(url.badge(id));
+								if (!badgeRes.ok) return;
+
+								const badge = await badgeRes.json();
+								if (!badge?.name || !badge?.url?.dark) return;
+
+								result.push({
+									tooltip: badge.name,
+									badge: badge.url.dark,
+								});
+							}),
+						);
 						break;
 					}
 				}

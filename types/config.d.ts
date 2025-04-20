@@ -3,8 +3,3 @@ type Environment = {
 	host: string;
 	development: boolean;
 };
-
-type badgeURLMap = {
-	service: string;
-	url: string | ((userId: string) => string);
-};
