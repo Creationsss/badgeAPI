@@ -11,6 +11,6 @@ main().catch((error: Error) => {
 	process.exit(1);
 });
 
-if (process.env.Inpterodactyl === "true") {
+if (process.env.IN_PTERODACTYL === "true") {
 	console.log("Server Started");
 }
