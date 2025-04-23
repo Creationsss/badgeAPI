@@ -37,12 +37,9 @@ class ServerHandler {
 			},
 		});
 
-		logger.info(
-			`Server running at http://${server.hostname}:${server.port}`,
-			{
-				breakLine: true,
-			}
-		);
+		logger.info(`Server running at http://${server.hostname}:${server.port}`, {
+			breakLine: true,
+		});
 
 		this.logRoutes();
 	}
