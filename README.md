@@ -91,4 +91,4 @@ bun run start
 ```
 
 ## License
-[MIT](LICENSE)
+[BSD 3](LICENSE)
