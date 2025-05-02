@@ -71,7 +71,8 @@ GET /:userId
 - Equicord
 - Nekocord
 - ReviewDb
-- Nekocord
+- Enmity
+- Discord ( some )
 
 ### Example
 
