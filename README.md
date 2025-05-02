@@ -80,18 +80,10 @@ GET /:userId
 GET /209830981060788225?seperated=true&cache=true&services=equicord
 ```
 
-## Development
-
-Run formatting and linting with BiomeJS:
-
-```bash
-bun run lint
-bun run lint:fix
-```
-
 ## Start the Server
 
 ```bash
+bun i
 bun run start
 ```
 
