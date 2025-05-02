@@ -2,6 +2,9 @@
 
 A fast Discord badge aggregation API built with [Bun](https://bun.sh) and Redis caching.
 
+# Preview
+https://badges.creations.works
+
 ## Features
 
 - Aggregates custom badge data from multiple sources (e.g. Vencord, Nekocord, Equicord, etc.)
