@@ -59,11 +59,11 @@ GET /:userId
 
 ### Query Parameters
 
-| Name         | Description                                                              |
-|--------------|--------------------------------------------------------------------------|
-| `services`   | A comma or space separated list of services to fetch badges from         |
-| `cache`      | Set to `true` or `false` (default: `true`). `false` bypasses Redis |
-| `seperated`  | Set to `true` to return results grouped by service, else merged array  |
+| Name         | Description                                                                                       |
+|--------------|---------------------------------------------------------------------------------------------------|
+| `services`   | A comma or space separated list of services to fetch badges from, if this is empty it fetches all |
+| `cache`      | Set to `true` or `false` (default: `true`). `false` bypasses Redis                                |
+| `seperated`  | Set to `true` to return results grouped by service, else merged array                             |
 
 ### Supported Services
 
