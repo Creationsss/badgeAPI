@@ -1,4 +1,4 @@
-import { logger } from "@creations.works/logger";
+import { echo } from "@atums/echo";
 
 import { serverHandler } from "@/server";
 
@@ -7,7 +7,10 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: Error) => {
-	logger.error(["Error initializing the server:", error]);
+	echo.error({
+		message: "Error initializing the server",
+		error: error.message,
+	});
 	process.exit(1);
 });
 
