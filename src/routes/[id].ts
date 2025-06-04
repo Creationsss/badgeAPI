@@ -1,6 +1,6 @@
-import { badgeServices } from "@config/environment";
-import { fetchBadges } from "@helpers/badges";
-import { parseServices, validateID } from "@helpers/char";
+import { badgeServices } from "@config";
+import { fetchBadges } from "@lib/badges";
+import { parseServices, validateID } from "@lib/char";
 
 function isValidServices(services: string[]): boolean {
 	if (!Array.isArray(services)) return false;
@@ -18,47 +18,52 @@ const routeDef: RouteDef = {
 
 async function handler(request: ExtendedRequest): Promise<Response> {
 	const { id: userId } = request.params;
-	const { services, cache, seperated } = request.query;
-
-	let validServices: string[];
+	const { services, cache = "true", seperated = "false" } = request.query;
 
 	if (!validateID(userId)) {
 		return Response.json(
 			{
 				status: 400,
-				error: "Invalid Discord User ID",
+				error: "Invalid Discord User ID. Must be 17-20 digits.",
 			},
-			{
-				status: 400,
-			},
+			{ status: 400 },
 		);
 	}
 
+	let validServices: string[];
+	const availableServices = badgeServices.map((b) => b.service);
+
 	if (services) {
 		const parsed = parseServices(services);
-
-		if (parsed.length > 0) {
-			if (!isValidServices(parsed)) {
-				return Response.json(
-					{
-						status: 400,
-						error: "Invalid Services",
-					},
-					{
-						status: 400,
-					},
-				);
-			}
-
-			validServices = parsed;
-		} else {
-			validServices = badgeServices.map((b) => b.service);
+		if (parsed.length === 0) {
+			return Response.json(
+				{
+					status: 400,
+					error: "No valid services provided",
+					availableServices,
+				},
+				{ status: 400 },
+			);
 		}
+
+		if (!isValidServices(parsed)) {
+			return Response.json(
+				{
+					status: 400,
+					error: "Invalid service(s) provided",
+					availableServices,
+					provided: parsed,
+				},
+				{ status: 400 },
+			);
+		}
+
+		validServices = parsed;
 	} else {
-		validServices = badgeServices.map((b) => b.service);
+		validServices = availableServices;
 	}
 
-	const badges: BadgeResult = await fetchBadges(
+	const badges = await fetchBadges(
 		userId,
 		validServices,
 		{
@@ -68,27 +73,18 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 		request,
 	);
 
-	if (badges instanceof Error) {
-		return Response.json(
-			{
-				status: 500,
-				error: badges.message,
-			},
-			{
-				status: 500,
-			},
-		);
-	}
+	const isEmpty = Array.isArray(badges)
+		? badges.length === 0
+		: Object.keys(badges).length === 0;
 
-	if (badges.length === 0) {
+	if (isEmpty) {
 		return Response.json(
 			{
 				status: 404,
-				error: "No Badges Found",
+				error: "No badges found for this user",
+				services: validServices,
 			},
-			{
-				status: 404,
-			},
+			{ status: 404 },
 		);
 	}
 
@@ -105,9 +101,6 @@ async function handler(request: ExtendedRequest): Promise<Response> {
 				"Access-Control-Allow-Origin": "*",
 				"Access-Control-Allow-Methods": "GET, OPTIONS",
 				"Access-Control-Allow-Headers": "Content-Type",
-				"Access-Control-Max-Age": "86400",
-				"Access-Control-Allow-Credentials": "true",
-				"Access-Control-Expose-Headers": "Content-Type",
 			},
 		},
 	);

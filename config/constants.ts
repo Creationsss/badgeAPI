@@ -1,4 +1,4 @@
-export const discordBadges = {
+const discordBadges = {
 	// User badges
 	STAFF: 1 << 0,
 	PARTNER: 1 << 1,
@@ -23,7 +23,7 @@ export const discordBadges = {
 	USES_AUTOMOD: 1 << 24,
 };
 
-export const discordBadgeDetails = {
+const discordBadgeDetails = {
 	HYPESQUAD: {
 		tooltip: "HypeSquad Events",
 		icon: "/public/badges/discord/HYPESQUAD.svg",
@@ -85,4 +85,58 @@ export const discordBadgeDetails = {
 		tooltip: "Uses AutoMod",
 		icon: "/public/badges/discord/USES_AUTOMOD.svg",
 	},
+};
+
+const badgeServices: badgeURLMap[] = [
+	{
+		service: "Vencord",
+		url: "https://badges.vencord.dev/badges.json",
+	},
+	{
+		service: "Equicord", // Ekwekord ! WOOP
+		url: "https://raw.githubusercontent.com/Equicord/Equibored/refs/heads/main/badges.json",
+	},
+	{
+		service: "Nekocord",
+		url: "https://nekocord.dev/assets/badges.json",
+	},
+	{
+		service: "ReviewDb",
+		url: "https://manti.vendicated.dev/api/reviewdb/badges",
+	},
+	{
+		service: "Enmity",
+		url: (userId: string) => ({
+			user: `https://raw.githubusercontent.com/enmity-mod/badges/main/${userId}.json`,
+			badge: (id: string) =>
+				`https://raw.githubusercontent.com/enmity-mod/badges/main/data/${id}.json`,
+		}),
+	},
+	{
+		service: "Discord",
+		url: (userId: string) => `https://discord.com/api/v10/users/${userId}`,
+	},
+];
+
+function getServiceDescription(service: string): string {
+	const descriptions: Record<string, string> = {
+		Vencord: "Custom badges from Vencord Discord client",
+		Equicord: "Custom badges from Equicord Discord client",
+		Nekocord: "Custom badges from Nekocord Discord client",
+		ReviewDb: "Badges from ReviewDB service",
+		Enmity: "Custom badges from Enmity mobile Discord client",
+		Discord: "Official Discord badges (staff, partner, hypesquad, etc.)",
+	};
+
+	return descriptions[service] || "Custom badge service";
+}
+
+const gitUrl = "https://git.creations.works/creations/badgeAPI";
+
+export {
+	badgeServices,
+	discordBadges,
+	discordBadgeDetails,
+	getServiceDescription,
+	gitUrl,
 };

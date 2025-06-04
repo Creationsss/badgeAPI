@@ -1,14 +1,14 @@
 import { resolve } from "node:path";
-import { echo } from "@atums/echo";
-import { environment } from "@config/environment";
+import { Echo, echo } from "@atums/echo";
+import { environment } from "@config";
 import {
 	type BunFile,
 	FileSystemRouter,
 	type MatchedRoute,
-	type Serve,
+	type Server,
 } from "bun";
 
-import { webSocketHandler } from "@/websocket";
+import { webSocketHandler } from "@websocket";
 
 class ServerHandler {
 	private router: FileSystemRouter;
@@ -19,14 +19,14 @@ class ServerHandler {
 	) {
 		this.router = new FileSystemRouter({
 			style: "nextjs",
-			dir: "./src/routes",
+			dir: resolve("src", "routes"),
 			fileExtensions: [".ts"],
 			origin: `http://${this.host}:${this.port}`,
 		});
 	}
 
 	public initialize(): void {
-		const server: Serve = Bun.serve({
+		const server: Server = Bun.serve({
 			port: this.port,
 			hostname: this.host,
 			fetch: this.handleRequest.bind(this),
@@ -37,19 +37,15 @@ class ServerHandler {
 			},
 		});
 
-		const accessUrls: string[] = [
-			`http://${server.hostname}:${server.port}`,
-			`http://localhost:${server.port}`,
-			`http://127.0.0.1:${server.port}`,
-		];
+		const echoChild = new Echo({ disableFile: true });
 
-		echo.info(`Server running at ${accessUrls[0]}`);
-		echo.info(`Access via: ${accessUrls[1]} or ${accessUrls[2]}`);
-
-		this.logRoutes();
+		echoChild.info(
+			`Server running at http://${server.hostname}:${server.port}`,
+		);
+		this.logRoutes(echoChild);
 	}
 
-	private logRoutes(): void {
+	private logRoutes(echo: Echo): void {
 		echo.info("Available routes:");
 
 		const sortedRoutes: [string, string][] = Object.entries(
@@ -82,7 +78,7 @@ class ServerHandler {
 
 			if (await file.exists()) {
 				const fileContent: ArrayBuffer = await file.arrayBuffer();
-				const contentType: string = file.type || "application/octet-stream";
+				const contentType: string = file.type ?? "application/octet-stream";
 
 				response = new Response(fileContent, {
 					headers: { "Content-Type": contentType },
@@ -129,7 +125,7 @@ class ServerHandler {
 
 	private async handleRequest(
 		request: Request,
-		server: BunServer,
+		server: Server,
 	): Promise<Response> {
 		const extendedRequest: ExtendedRequest = request as ExtendedRequest;
 		extendedRequest.startPerf = performance.now();
@@ -142,23 +138,25 @@ class ServerHandler {
 			ip =
 				headers.get("CF-Connecting-IP")?.trim() ||
 				headers.get("X-Real-IP")?.trim() ||
-				headers.get("X-Forwarded-For")?.split(",")[0].trim() ||
+				headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ||
 				"unknown";
 		}
 
 		const pathname: string = new URL(request.url).pathname;
 
-		const baseDir = resolve("public/custom");
+		const baseDir = resolve("public", "custom");
 		const customPath = resolve(baseDir, pathname.slice(1));
 
 		if (!customPath.startsWith(baseDir)) {
-			return new Response("Forbidden", { status: 403 });
+			response = new Response("Forbidden", { status: 403 });
+			this.logRequest(extendedRequest, response, ip);
+			return response;
 		}
 
 		const customFile = Bun.file(customPath);
 		if (await customFile.exists()) {
 			const content = await customFile.arrayBuffer();
-			const type = customFile.type || "application/octet-stream";
+			const type: string = customFile.type ?? "application/octet-stream";
 			response = new Response(content, {
 				headers: { "Content-Type": type },
 			});
@@ -180,7 +178,7 @@ class ServerHandler {
 				const routeModule: RouteModule = await import(filePath);
 				const contentType: string | null = request.headers.get("Content-Type");
 				const actualContentType: string | null = contentType
-					? contentType.split(";")[0].trim()
+					? (contentType.split(";")[0]?.trim() ?? null)
 					: null;
 
 				if (

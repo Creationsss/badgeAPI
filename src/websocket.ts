@@ -26,7 +26,7 @@ class WebSocketHandler {
 		}
 	}
 
-	public handleClose(ws: ServerWebSocket, code: number, reason: string): void {
+	public handleClose(_ws: ServerWebSocket, code: number, reason: string): void {
 		echo.info(`WebSocket closed with code ${code}, reason: ${reason}`);
 	}
 }
