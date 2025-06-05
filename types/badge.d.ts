@@ -10,7 +10,7 @@ interface FetchBadgesOptions {
 	separated?: boolean;
 }
 
-type badgeURLMap = {
+type BadgeService = {
 	service: string;
 	url:
 		| string
@@ -51,15 +51,6 @@ interface ReviewDbData
 
 type BadgeServiceData = VencordEquicordData | NekocordData | ReviewDbData;
 
-interface BadgeService {
-	service: string;
-	url:
-		| string
-		| ((
-				userId: string,
-		  ) => string | { user: string; badge: (id: string) => string });
-}
-
 interface VencordBadgeItem {
 	tooltip: string;
 	badge: string;
@@ -86,4 +77,25 @@ interface EnmityBadgeItem {
 interface DiscordUserData {
 	avatar: string;
 	flags: number;
+}
+
+interface PluginData {
+	hasPatches: boolean;
+	hasCommands: boolean;
+	enabledByDefault: boolean;
+	required: boolean;
+	tags: string[];
+	name: string;
+	description: string;
+	authors: Array<{
+		name: string;
+		id: string;
+	}>;
+	filePath: string;
+	commands?: Array<{
+		name: string;
+		description: string;
+	}>;
+	dependencies?: string[];
+	target?: string;
 }

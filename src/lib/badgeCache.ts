@@ -1,5 +1,11 @@
 import { echo } from "@atums/echo";
-import { badgeFetchInterval, badgeServices, gitUrl, redisTtl } from "@config";
+import {
+	badgeFetchInterval,
+	badgeServices,
+	gitUrl,
+	redisTtl,
+	vencordEquicordContributorUrl,
+} from "@config";
 import { redis } from "bun";
 
 class BadgeCacheManager {
@@ -108,6 +114,72 @@ class BadgeCacheManager {
 
 						if (res.ok) {
 							data = (await res.json()) as VencordEquicordData;
+						}
+					}
+
+					if (typeof vencordEquicordContributorUrl === "string") {
+						const contributorRes = await fetch(vencordEquicordContributorUrl, {
+							headers: {
+								"User-Agent": `BadgeAPI/1.0 ${gitUrl}`,
+							},
+						});
+
+						if (contributorRes.ok) {
+							const pluginData = await contributorRes.json();
+
+							if (Array.isArray(pluginData)) {
+								if (!data) {
+									data = {} as VencordEquicordData;
+								}
+
+								const contributors = new Set<string>();
+
+								for (const plugin of pluginData) {
+									if (plugin.authors && Array.isArray(plugin.authors)) {
+										const isEquicordPlugin =
+											plugin.filePath &&
+											typeof plugin.filePath === "string" &&
+											plugin.filePath.includes("equicordplugins/");
+
+										const shouldInclude =
+											(serviceKey === "equicord" && isEquicordPlugin) ||
+											(serviceKey === "vencord" && !isEquicordPlugin);
+
+										if (shouldInclude) {
+											for (const author of plugin.authors) {
+												if (author.id) {
+													contributors.add(author.id);
+												}
+											}
+										}
+									}
+								}
+
+								const badgeDetails =
+									serviceKey === "vencord"
+										? {
+												tooltip: "Vencord Contributor",
+												badge: "https://vencord.dev/assets/favicon.png",
+											}
+										: {
+												tooltip: "Equicord Contributor",
+												badge: "https://i.imgur.com/57ATLZu.png",
+											};
+
+								for (const authorId of contributors) {
+									if (!data[authorId]) {
+										data[authorId] = [];
+									}
+
+									const hasContributorBadge = data[authorId].some(
+										(badge) => badge.tooltip === badgeDetails.tooltip,
+									);
+
+									if (!hasContributorBadge) {
+										data[authorId].push(badgeDetails);
+									}
+								}
+							}
 						}
 					}
 					break;

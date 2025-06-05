@@ -87,7 +87,7 @@ const discordBadgeDetails = {
 	},
 };
 
-const badgeServices: badgeURLMap[] = [
+const badgeServices: BadgeService[] = [
 	{
 		service: "Vencord",
 		url: "https://badges.vencord.dev/badges.json",
@@ -118,6 +118,9 @@ const badgeServices: badgeURLMap[] = [
 	},
 ];
 
+const vencordEquicordContributorUrl =
+	"https://raw.githubusercontent.com/Equicord/Equibored/refs/heads/main/plugins.json";
+
 function getServiceDescription(service: string): string {
 	const descriptions: Record<string, string> = {
 		Vencord: "Custom badges from Vencord Discord client",
@@ -137,6 +140,7 @@ export {
 	badgeServices,
 	discordBadges,
 	discordBadgeDetails,
+	vencordEquicordContributorUrl,
 	getServiceDescription,
 	gitUrl,
 };
