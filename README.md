@@ -3,7 +3,7 @@
 A fast Discord badge aggregation API built with [Bun](https://bun.sh) and Redis caching.
 
 # Preview
-https://badges.creations.works
+https://badges.atums.world
 
 ## Features
 
