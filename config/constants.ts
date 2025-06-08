@@ -85,16 +85,36 @@ const discordBadgeDetails = {
 		tooltip: "Uses AutoMod",
 		icon: "/public/badges/discord/USES_AUTOMOD.svg",
 	},
+
+	// Custom
+
+	VENCORD_CONTRIBUTOR: {
+		tooltip: "Vencord Contributor",
+		icon: "/public/badges/vencord.png",
+	},
+	EQUICORD_CONTRIBUTOR: {
+		tooltip: "Equicord Contributor",
+		icon: "/public/badges/equicord.svg",
+	},
+
+	DISCORD_NITRO: {
+		tooltip: "Discord Nitro",
+		icon: "/public/badges/discord/NITRO.svg",
+	},
 };
 
 const badgeServices: BadgeService[] = [
 	{
 		service: "Vencord",
 		url: "https://badges.vencord.dev/badges.json",
+		pluginsUrl:
+			"https://raw.githubusercontent.com/Vencord/builds/main/plugins.json",
 	},
 	{
 		service: "Equicord", // Ekwekord ! WOOP
 		url: "https://raw.githubusercontent.com/Equicord/Equibored/refs/heads/main/badges.json",
+		pluginsUrl:
+			"https://raw.githubusercontent.com/Equicord/Equibored/refs/heads/main/plugins.json",
 	},
 	{
 		service: "Nekocord",
@@ -118,9 +138,6 @@ const badgeServices: BadgeService[] = [
 	},
 ];
 
-const vencordEquicordContributorUrl =
-	"https://raw.githubusercontent.com/Equicord/Equibored/refs/heads/main/plugins.json";
-
 function getServiceDescription(service: string): string {
 	const descriptions: Record<string, string> = {
 		Vencord: "Custom badges from Vencord Discord client",
@@ -140,7 +157,6 @@ export {
 	badgeServices,
 	discordBadges,
 	discordBadgeDetails,
-	vencordEquicordContributorUrl,
 	getServiceDescription,
 	gitUrl,
 };

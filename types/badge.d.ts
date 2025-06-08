@@ -19,6 +19,7 @@ type BadgeService = {
 				user: string;
 				badge: (id: string) => string;
 		  });
+	pluginsUrl?: string;
 };
 
 interface VencordEquicordData {

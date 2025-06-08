@@ -11,6 +11,8 @@ function getRequestOrigin(request: Request): string {
 	return `${forwardedProto}://${host}`;
 }
 
+const USER_CACHE_SERVICES = ["discord", "enmity"];
+
 export async function fetchBadges(
 	userId: string | undefined,
 	services: string[],
@@ -26,23 +28,26 @@ export async function fetchBadges(
 
 	const userCachePromises = services.map(async (service) => {
 		const serviceKey = service.toLowerCase();
+
+		if (!USER_CACHE_SERVICES.includes(serviceKey) || nocache) {
+			return false;
+		}
+
 		const userCacheKey = `user_badges:${serviceKey}:${userId}`;
 
-		if (!nocache) {
-			try {
-				const cached = await redis.get(userCacheKey);
-				if (cached) {
-					const parsed: Badge[] = JSON.parse(cached);
-					results[serviceKey] = parsed;
-					return true;
-				}
-			} catch {}
-		}
+		try {
+			const cached = await redis.get(userCacheKey);
+			if (cached) {
+				const parsed: Badge[] = JSON.parse(cached);
+				results[serviceKey] = parsed;
+				return true;
+			}
+		} catch {}
+
 		return false;
 	});
 
 	const cacheHits = await Promise.all(userCachePromises);
-
 	const servicesToFetch = services.filter((_, index) => !cacheHits[index]);
 
 	await Promise.all(
@@ -68,10 +73,16 @@ export async function fetchBadges(
 
 						const userBadges = serviceData[userId];
 						if (Array.isArray(userBadges)) {
+							const origin = request ? getRequestOrigin(request) : "";
+
 							for (const badgeItem of userBadges) {
+								const badgeUrl = badgeItem.badge.startsWith("/")
+									? `${origin}${badgeItem.badge}`
+									: badgeItem.badge;
+
 								result.push({
 									tooltip: badgeItem.tooltip,
-									badge: badgeItem.badge,
+									badge: badgeUrl,
 								});
 							}
 						}
@@ -199,8 +210,8 @@ export async function fetchBadges(
 
 						if (data.avatar?.startsWith("a_")) {
 							result.push({
-								tooltip: "Discord Nitro",
-								badge: `${origin}/public/badges/discord/NITRO.svg`,
+								tooltip: discordBadgeDetails.DISCORD_NITRO.tooltip,
+								badge: `${origin}${discordBadgeDetails.DISCORD_NITRO.icon}`,
 							});
 						}
 
@@ -228,17 +239,16 @@ export async function fetchBadges(
 						break;
 				}
 
+				results[serviceKey] = result;
+
 				if (
-					result.length > 0 ||
-					serviceKey === "discord" ||
-					serviceKey === "enmity"
+					USER_CACHE_SERVICES.includes(serviceKey) &&
+					!nocache &&
+					result.length > 0
 				) {
-					results[serviceKey] = result;
-					if (!nocache) {
-						const userCacheKey = `user_badges:${serviceKey}:${userId}`;
-						await redis.set(userCacheKey, JSON.stringify(result));
-						await redis.expire(userCacheKey, Math.min(redisTtl, 900));
-					}
+					const userCacheKey = `user_badges:${serviceKey}:${userId}`;
+					await redis.set(userCacheKey, JSON.stringify(result));
+					await redis.expire(userCacheKey, Math.min(redisTtl, 900));
 				}
 			} catch (error) {
 				echo.warn({

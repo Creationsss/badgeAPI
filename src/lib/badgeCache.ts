@@ -2,9 +2,9 @@ import { echo } from "@atums/echo";
 import {
 	badgeFetchInterval,
 	badgeServices,
+	discordBadgeDetails,
 	gitUrl,
 	redisTtl,
-	vencordEquicordContributorUrl,
 } from "@config";
 import { redis } from "bun";
 
@@ -117,8 +117,8 @@ class BadgeCacheManager {
 						}
 					}
 
-					if (typeof vencordEquicordContributorUrl === "string") {
-						const contributorRes = await fetch(vencordEquicordContributorUrl, {
+					if (typeof service.pluginsUrl === "string") {
+						const contributorRes = await fetch(service.pluginsUrl, {
 							headers: {
 								"User-Agent": `BadgeAPI/1.0 ${gitUrl}`,
 							},
@@ -136,20 +136,9 @@ class BadgeCacheManager {
 
 								for (const plugin of pluginData) {
 									if (plugin.authors && Array.isArray(plugin.authors)) {
-										const isEquicordPlugin =
-											plugin.filePath &&
-											typeof plugin.filePath === "string" &&
-											plugin.filePath.includes("equicordplugins/");
-
-										const shouldInclude =
-											(serviceKey === "equicord" && isEquicordPlugin) ||
-											(serviceKey === "vencord" && !isEquicordPlugin);
-
-										if (shouldInclude) {
-											for (const author of plugin.authors) {
-												if (author.id) {
-													contributors.add(author.id);
-												}
+										for (const author of plugin.authors) {
+											if (author.id) {
+												contributors.add(author.id);
 											}
 										}
 									}
@@ -158,12 +147,14 @@ class BadgeCacheManager {
 								const badgeDetails =
 									serviceKey === "vencord"
 										? {
-												tooltip: "Vencord Contributor",
-												badge: "https://vencord.dev/assets/favicon.png",
+												tooltip:
+													discordBadgeDetails.VENCORD_CONTRIBUTOR.tooltip,
+												badge: discordBadgeDetails.VENCORD_CONTRIBUTOR.icon,
 											}
 										: {
-												tooltip: "Equicord Contributor",
-												badge: "https://i.imgur.com/57ATLZu.png",
+												tooltip:
+													discordBadgeDetails.EQUICORD_CONTRIBUTOR.tooltip,
+												badge: discordBadgeDetails.EQUICORD_CONTRIBUTOR.icon,
 											};
 
 								for (const authorId of contributors) {
