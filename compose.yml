@@ -1,0 +1,32 @@
+services:
+    badge-api:
+        container_name: badge-api
+        pull_policy: build
+        build:
+            context: .
+        restart: unless-stopped
+        ports:
+            - "${PORT:-8080}:${PORT:-8080}"
+        env_file:
+            - .env
+        environment:
+            - REDIS_URL=redis://dragonfly:6379
+        depends_on:
+            dragonfly:
+                condition: service_started
+        networks:
+            - badge-api-network
+
+    dragonfly:
+        image: docker.dragonflydb.io/dragonflydb/dragonfly
+        restart: unless-stopped
+        ulimits:
+            memlock: -1
+        volumes:
+            - ./dragonfly-data:/data
+        networks:
+            - badge-api-network
+
+networks:
+    badge-api-network:
+        driver: bridge
